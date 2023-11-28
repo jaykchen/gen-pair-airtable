@@ -11,6 +11,8 @@ use dotenv::dotenv;
 use flowsnet_platform_sdk::logger;
 use std::collections::HashMap;
 use std::env;
+use std::fs;
+
 
 #[no_mangle]
 #[tokio::main(flavor = "current_thread")]
@@ -22,7 +24,7 @@ async fn inner() {
     dotenv().ok();
     logger::init();
     let file_path = "test.txt";
-    let contents = match tokio::fs::read_to_string(file_path).await {
+    let contents = match fs::read_to_string(file_path) {
         Ok(contents) => contents,
         Err(e) => {
             log::error!("Failed to read file: {:?}", e);
