@@ -23,14 +23,7 @@ pub async fn on_deploy() {
 async fn inner() {
     dotenv().ok();
     logger::init();
-    let file_path = "../test.txt";
-    let contents = match fs::read_to_string(file_path) {
-        Ok(contents) => contents,
-        Err(e) => {
-            log::error!("Failed to read file: {:?}", e);
-            return; // Exit the function if we can't read the file
-        }
-    };
+    let contents = include_str!("../test.txt");
     
     let chunks = split_text_into_chunks(&contents);
     let chunks_len = chunks.len();
