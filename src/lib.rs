@@ -186,7 +186,7 @@ fn get_cron_time_with_date() -> String {
     let now = Local::now();
     let now_minute = now.minute() + 2;
     format!(
-        "{:02} {:02} {:02} {:02} * *",
+        "{:02} {:02} {:02} {:02} *",
         now_minute,
         now.hour(),
         now.day(),
