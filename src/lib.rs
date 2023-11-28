@@ -11,20 +11,25 @@ use dotenv::dotenv;
 use flowsnet_platform_sdk::logger;
 use std::collections::HashMap;
 use std::env;
-use std::fs;
 
 #[no_mangle]
 #[tokio::main(flavor = "current_thread")]
 pub async fn on_deploy() {
-    inner().await;
+  let _ =  inner().await;
 }
 
 async fn inner() {
     dotenv().ok();
     logger::init();
     let file_path = "test.txt";
-    let contents = fs::read_to_string(file_path).expect("Something went wrong reading the file");
-
+    let contents = match tokio::fs::read_to_string(file_path).await {
+        Ok(contents) => contents,
+        Err(e) => {
+            log::error!("Failed to read file: {:?}", e);
+            return; // Exit the function if we can't read the file
+        }
+    };
+    
     let chunks = split_text_into_chunks(&contents);
     let chunks_len = chunks.len();
     let mut chunk_count = 0;
