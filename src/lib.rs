@@ -23,7 +23,7 @@ pub async fn on_deploy() {
 async fn inner() {
     dotenv().ok();
     logger::init();
-    let file_path = "test.txt";
+    let file_path = "../test.txt";
     let contents = match fs::read_to_string(file_path) {
         Ok(contents) => contents,
         Err(e) => {
