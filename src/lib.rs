@@ -15,7 +15,11 @@ use std::fs;
 
 #[no_mangle]
 #[tokio::main(flavor = "current_thread")]
-pub async fn run() {
+pub async fn on_deploy() {
+    inner().await;
+}
+
+async fn inner() {
     dotenv().ok();
     logger::init();
     let file_path = "test.txt";
