@@ -7,23 +7,26 @@ use async_openai::{
     },
     Client,
 };
+use chrono::prelude::*;
 use dotenv::dotenv;
 use flowsnet_platform_sdk::logger;
+use schedule_flows::{schedule_cron_job, schedule_handler};
 use std::collections::HashMap;
 use std::env;
-
 
 #[no_mangle]
 #[tokio::main(flavor = "current_thread")]
 pub async fn on_deploy() {
-  let _ =  inner().await;
+    let cron_time_with_date = get_cron_time_with_date();
+    schedule_cron_job(cron_time_with_date, String::from("cron_job_evoked")).await;
 }
 
-async fn inner() {
+#[schedule_handler]
+async fn handler(body: Vec<u8>) {
     dotenv().ok();
     logger::init();
     let contents = include_str!("../test.txt");
-    
+
     let chunks = split_text_into_chunks(&contents);
     let chunks_len = chunks.len();
     let mut chunk_count = 0;
@@ -177,4 +180,16 @@ pub async fn upload_airtable(question: &str, answer: &str) {
         &airtable_table_name,
         data.clone(),
     );
+}
+
+fn get_cron_time_with_date() -> String {
+    let now = Local::now();
+    let now_minute = now.minute() + 2;
+    format!(
+        "{:02} {:02} {:02} {:02} * *",
+        now_minute,
+        now.hour(),
+        now.day(),
+        now.month(),
+    )
 }
