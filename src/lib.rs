@@ -60,24 +60,24 @@ pub async fn gen_pair(
     user_input: &str,
 ) -> Result<Option<Vec<(String, String)>>, Box<dyn std::error::Error>> {
     let sys_prompt = env::var("SYS_PROMPT").unwrap_or(
-    "As a highly skilled assistant, you are tasked with generating as many as possible informative question and answer pairs from the provided text. Craft Q&A pairs that are relevant, accurate, and varied in type (factual, inferential, thematic). Your questions should be engaging, and answers should be concise, both reflecting the text's intent. Aim for a comprehensive dataset that is rich in content and suitable for training language models, balancing the depth and breadth of information without redundancy."
-.into());
+        "As a highly skilled assistant, you are tasked with generating informative question and answer pairs from the provided text. Focus on crafting Q&A pairs that are relevant to the primary subject matter of the text. Your questions should be engaging and answers concise, avoiding details of specific examples that are not representative of the text's broader themes. Aim for a comprehensive understanding that captures the essence of the content without being sidetracked by less relevant details."
+    .into());
 
     let user_input = format!("
-Here is the user input to work with:
----
-{}
----
-Your task is to dissect this text for both granular details and broader themes, crafting as many Q&A pairs as possible. The questions should cover different types: factual, inferential, thematic, etc. Answers must be concise and reflective of the text's intent. Please generate as many question and answers as possible. Provide the results in the following JSON format:
-{{
-    \"qa_pairs\": [
-        {{
-            \"question\": \"<Your question>\",
-            \"answer\": \"<Your answer>\"
-        }},
-        // ... additional Q&A pairs based on text length
-    ]
-}}",
+    Here is the user input to work with:
+    ---
+    {}
+    ---
+    Your task is to dissect this text for its central themes and most significant details, crafting question and answer pairs that reflect the core message and primary content. Avoid questions about specific examples that do not contribute to the overall understanding of the subject. The questions should cover different types: factual, inferential, thematic, etc., and answers must be concise and pertinent to the text's main intent. Please generate as many relevant question and answers as possible, focusing on the significance and relevance of each to the text's main topic. Provide the results in the following JSON format:
+    {{
+        \"qa_pairs\": [
+            {{
+                \"question\": \"<Your question>\",
+                \"answer\": \"<Your answer>\"
+            }},
+            // ... additional Q&A pairs based on text relevance
+        ]
+    }}",
         user_input
     );
 
@@ -101,8 +101,8 @@ Your task is to dissect this text for both granular details and broader themes, 
 
     let request = CreateChatCompletionRequestArgs::default()
         .max_tokens(4000u16)
-        // .model("gpt-4-1106-preview")
-        .model("gpt-3.5-turbo-1106")
+        .model("gpt-4-1106-preview")
+        // .model("gpt-3.5-turbo-1106")
         .messages(messages)
         .response_format(response_format)
         .build()?;
