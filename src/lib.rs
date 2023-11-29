@@ -11,6 +11,7 @@ use chrono::prelude::*;
 use dotenv::dotenv;
 use flowsnet_platform_sdk::logger;
 use schedule_flows::{schedule_cron_job, schedule_handler};
+use serde_json;
 use std::collections::HashMap;
 use std::env;
 
@@ -25,13 +26,13 @@ pub async fn on_deploy() {
 async fn handler(body: Vec<u8>) {
     dotenv().ok();
     logger::init();
-    let contents = include_str!("../test.txt");
+    let json_contents = include_str!("../rust_chapter.json");
 
-    let chunks = split_text_into_chunks(&contents);
-    let chunks_len = chunks.len();
-    let mut chunk_count = 0;
+    let data: Vec<String> = serde_json::from_str(json_contents).expect("failed to parse json");
     let mut count = 0;
-    for user_input in chunks {
+    let mut chunk_count = 0;
+    let chunks_len = data.len();
+    for user_input in data {
         chunk_count += 1;
         match gen_pair(&user_input).await {
             Ok(Some(qa_pairs)) => {
@@ -64,11 +65,9 @@ pub async fn gen_pair(
 
     let user_input = format!("
 Here is the user input to work with:
-
 ---
 {}
 ---
-
 Your task is to dissect this text for both granular details and broader themes, crafting as many Q&A pairs as possible. The questions should cover different types: factual, inferential, thematic, etc. Answers must be concise and reflective of the text's intent. Please generate as many question and answers as possible. Provide the results in the following JSON format:
 {{
     \"qa_pairs\": [
@@ -102,7 +101,8 @@ Your task is to dissect this text for both granular details and broader themes, 
 
     let request = CreateChatCompletionRequestArgs::default()
         .max_tokens(4000u16)
-        .model("gpt-4-1106-preview")
+        // .model("gpt-4-1106-preview")
+        .model("gpt-3.5-turbo-1106")
         .messages(messages)
         .response_format(response_format)
         .build()?;
